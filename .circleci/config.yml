@@ -14,8 +14,41 @@ jobs:
           key: yarn-packages-{{ checksum "yarn.lock" }}-{{ .Environment.CACHE_VERSION }}
           paths:
             - node_modules
+  test: 
+    docker:
+      - image: circleci/node:dubnium-browsers
+    steps: 
+      - checkout
+      - restore_cache: 
+          keys: 
+            - yarn-packages-{{ checksum "yarn.lock" }}-{{ .Environment.CACHE_VERSION }}
+      - run:
+          command: yarn test
+  prod:
+    docker:
+      - image: circleci/node:dubnium-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - yarn-packages-{{ checksum "yarn.lock" }}-{{ .Environment.CACHE_VERSION }}
+      - run:
+          command : yarn run build
+      - run:
+          command: |
+            cp dist/ /tmp/dist -r
+      - store_artifacts:
+          path: /tmp/dist
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - dist
  
 workflows:
   build_and_test:
     jobs:
       - build
+      - prod:
+        requires:
+          - build
+      
