@@ -49,6 +49,6 @@ workflows:
     jobs:
       - build
       - prod:
-        requires:
-          - build
+          requires:
+            - build
       
