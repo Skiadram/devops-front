@@ -54,6 +54,43 @@ jobs:
           command: |
             sudo npm install -g --silent netlify-cli
             netlify deploy --prod --auth $NETLIFY_TOKEN --dir=/tmp/dist --site $NETLIFY_SITE_ID
+
+
+  build_image:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: docker build -t sukiadoramu/devops-front:app .
+      - run:
+          name: Archive Docker image
+          command: docker save -o image.tar sukiadoramu/devops-front
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./image.tar
+
+  publish_latest:
+    docker:
+      - image: circleci/buildpack-deps:stretch       
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - setup_remote_docker
+      - run:
+          name: Load archived Docker image
+          command: docker load -i /tmp/workspace/image.tar
+      - run:
+          name: Publish Docker Image to Docker Hub
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker tag sukiadoramu/devops-front:app sukiadoramu/devops-front:$CIRCLE_BUILD_NUM
+            docker tag sukiadoramu/devops-front:app sukiadoramu/devops-front:latest
+            docker push sukiadoramu/devops-front:latest
+            docker push sukiadoramu/devops-front:$CIRCLE_BUILD_NUM
  
 workflows:
   build_and_test:
@@ -65,4 +102,7 @@ workflows:
       - deploy:
           requires:
             - prod
+      - publish_latest:
+          requires:
+            - build_image
       
