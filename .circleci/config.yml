@@ -54,8 +54,6 @@ jobs:
           command: |
             sudo npm install -g --silent netlify-cli
             netlify deploy --prod --auth $NETLIFY_TOKEN --dir=/tmp/dist --site $NETLIFY_SITE_ID
-
-
   build_image:
     docker:
       - image: circleci/buildpack-deps:stretch
