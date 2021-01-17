@@ -43,6 +43,17 @@ jobs:
           root: /tmp
           paths:
             - dist
+  deploy: 
+    docker:
+      - image: circleci/node:dubnium-browsers
+    working_directory: ~/deploy-netlfify
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          command: |
+            sudo npm install -g --silent netlify-cli
+            netlify deploy --prod --auth $NETLIFY_TOKEN --dir=/tmp/dist --site $NETLIFY_SITE_ID
  
 workflows:
   build_and_test:
