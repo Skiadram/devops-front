@@ -1,5 +1,5 @@
 export const API_URL =
   process.env.NODE_ENV === "production"
-    ? "https://tobedefined.io/api"
+    ? "https://damp-taiga-40793.herokuapp.com/api"
     : "http://localhost:2020/api";
 export default API_URL;
