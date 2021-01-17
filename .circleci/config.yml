@@ -62,4 +62,7 @@ workflows:
       - prod:
           requires:
             - build
+      - deploy:
+          requires:
+            - prod
       
